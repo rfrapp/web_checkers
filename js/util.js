@@ -23,6 +23,11 @@ function replaceAll(str, find, replace)
 	return str;
 }
 
+function rcstr(row, col)
+{
+  return row.toString() + "," + col.toString();
+}
+
 Array.prototype.remove = function() 
 {
     var what, a = arguments, L = a.length, ax;

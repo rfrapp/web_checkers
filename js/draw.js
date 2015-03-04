@@ -1,4 +1,14 @@
 
+function draw_image(context, imgpath, location)
+{
+	var img = new Image();
+	img.src = imgpath;
+	img.onload = function()
+	{
+		context.drawImage(img, location.x, location.y);
+	};
+}
+
 function draw_rectangle(context, location, w, h, color)
 {
 	context.beginPath();
@@ -38,6 +48,7 @@ function draw_line(context, x1, x2, y1, y2, color, stroke_w)
 	context.closePath();
 }
 
+// Draws an 'X' shape
 function draw_x(context, center, w, h, color, stroke_w)
 {
 	var x1, x2, y1, y2;

@@ -8,6 +8,9 @@ var CheckersView = function(parent, x, y, w, h, canvas_element)
 	this.turn_chars = parent.game.turn_values;
 	this.turn_colors = ["black", "#B8022C"];
 	this.tile_rects = [];
+	this.king_image = new Image();
+	this.king_image.src = "images/crown-small.png";
+	this.king_img_loaded = false;
 
 	this.init();
 	this.wire_events();
@@ -47,15 +50,21 @@ CheckersView.prototype.handle_input = function(event)
 	var mouse_pos = getMousePos(this.canvas_element, event);
 	var rects = this.tile_rects;
 	var i = 0, j = 0;
+
+	var assocs = this.parent.piece_tile_assocs;
+
 	for (i = 0; i < board.rows; i++)
 	{
 	    for (j = 0; j < board.cols; j++)
 	    {
 	    	if (this.parent.state == 0)
 	    	{
+	    		var a = assocs[i.toString() + "," + j.toString()];
+
+	    		if (!a) continue;
+
 		        if (rects[i][j].collide_point(mouse_pos.x, mouse_pos.y) &&
-		        	this.parent.is_piece_on_tile(board.arr[i][j], 
-		        	this.parent.game.turn_values[this.parent.turn]))
+		        	a.piece.value == this.parent.game.turn_values[this.parent.turn])
 		        {
 		            r = i;
 		            c = j;
@@ -76,6 +85,7 @@ CheckersView.prototype.handle_input = function(event)
 
 	if (r != -1 && c != -1)
 	{
+		console.log("here");
 		this.parent.get_notification({r: r, c: c});
 	}
 };
@@ -101,14 +111,26 @@ CheckersView.prototype.draw = function()
 
 	var assocs = this.parent.piece_tile_assocs;
 
-	for (i = 0; i < assocs.length; i++)
+	// for (i = 0; i < assocs.length; i++)
+	for (key in assocs)
 	{
-		var cx = assocs[i].tile.col * TILE_WIDTH + TILE_WIDTH / 2;
-		var cy = assocs[i].tile.row * TILE_HEIGHT + TILE_HEIGHT / 2;
-		var color = (assocs[i].piece.value == "B") ? this.turn_colors[0] : this.turn_colors[1];
+		if (assocs.hasOwnProperty(key))
+		{
+			var a = assocs[key];
+			var cx = a.tile.col * TILE_WIDTH + TILE_WIDTH / 2;
+			var cy = a.tile.row * TILE_HEIGHT + TILE_HEIGHT / 2;
+			var color = (a.piece.value == "B") ? this.turn_colors[0] : this.turn_colors[1];
 
-		draw_filled_circle(this.context, {x: cx, y: cy}, 
-						   (TILE_WIDTH - 10) / 2, color, 1, "#ffff66");
+			draw_filled_circle(this.context, {x: cx, y: cy}, 
+							   (TILE_WIDTH - 10) / 2, color, 1, "#ffff66");
+
+			if (a.piece.is_king)
+			{
+				var x = a.tile.col * TILE_WIDTH + this.king_image.width / 2;
+				var y = a.tile.row * TILE_HEIGHT + this.king_image.height / 2;
+				this.context.drawImage(this.king_image, x, y);
+			}
+		}
 	}
 	
 };

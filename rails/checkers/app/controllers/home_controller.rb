@@ -20,7 +20,8 @@ class HomeController < ApplicationController
     @assoc = Thread.current[:product_v8].eval("PieceTileAssociation")
     @assoc = @assoc.new(@piece, @board[:arr][0][0])
 
-    @assocs = [@assoc]
+    @assocs = {};
+    @assocs["0,0"] = @assoc
     @result = @game.can_move(@board, @assocs, 0, 0, 1, 1, "B")
 
   end
