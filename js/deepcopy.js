@@ -270,19 +270,19 @@ owl = (function() {
 	// for the cloneNode method.  The global document is also defined to
 	// be a Node, but is a special case in many ways.
 	function isNode(source) {
-		if ( window.Node ) {
-			return source instanceof Node;
-		} else {
-			// the document is a special Node and doesn't have many of
-			// the common properties so we use an identity check instead.
-			if ( source === document ) return true;
-			return (
-				typeof source.nodeType === 'number' &&
-				source.attributes &&
-				source.childNodes &&
-				source.cloneNode
-			);
-		}
+		// if ( this.Node ) {
+		// 	return source instanceof Node;
+		// } else {
+		// 	// the document is a special Node and doesn't have many of
+		// 	// the common properties so we use an identity check instead.
+		// 	if ( source === document ) return true;
+		// 	return (
+		// 		typeof source.nodeType === 'number' &&
+		// 		source.attributes &&
+		// 		source.childNodes &&
+		// 		source.cloneNode
+		// 	);
+		// }
 	}
 
 	// Node copier

@@ -188,7 +188,7 @@ CheckersGame.prototype.possible_moves = function(board, assocs, turn)
     return possible_moves;
 };
 
-CheckersGame.prototype.enforce_jumps = function(board, assocs, turn)
+CheckersGame.prototype.enforce_jumps = function(board, assocs, turn, switch_turn)
 {
     var jumps = this.possible_jumps(board, assocs, turn);
     var i = 0;
@@ -207,7 +207,7 @@ CheckersGame.prototype.enforce_jumps = function(board, assocs, turn)
         // swap turn
         // console.log('move forced');
     }
-    else 
+    else if (switch_turn)
     {
         // console.log("turn was " + turn);
         turn = (turn == this.turn_values[0]) ? this.turn_values[1] : this.turn_values[0];
@@ -258,13 +258,13 @@ CheckersGame.prototype.can_move = function(board, assocs, r0, c0, r1, c1, turn, 
         if (enforce)
         {
             // enforce double/triple/etc jumps 
-            turn = this.enforce_jumps(new_board, new_assocs, turn);
+            turn = this.enforce_jumps(new_board, new_assocs, turn, false);
 
             // switch turn
             turn = (turn == this.turn_values[0]) ? this.turn_values[1] : this.turn_values[0];
 
             // enforce jump 
-            turn = this.enforce_jumps(new_board, new_assocs, turn);
+            turn = this.enforce_jumps(new_board, new_assocs, turn, true);
         }
 
         var ret = [true, new_board, new_assocs, turn];
@@ -281,7 +281,7 @@ CheckersGame.prototype.can_move = function(board, assocs, r0, c0, r1, c1, turn, 
             // console.log("checking jumps for " + turn);
 
             // enforce jump 
-            turn = this.enforce_jumps(new_board, new_assocs, turn);
+            turn = this.enforce_jumps(new_board, new_assocs, turn, true);
         }
 
         var ret = [true, new_board, new_assocs, turn];

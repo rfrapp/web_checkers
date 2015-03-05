@@ -13,7 +13,7 @@ class HomeController < ApplicationController
     @game  = Thread.current[:product_v8].eval("new CheckersGame")
     @board = Thread.current[:product_v8].eval("Board")
     
-    @board = @board.new(nil, 8, 8, @game[:turn_values])
+    @board = @board.new(8, 8, @game[:turn_values])
     @board.init()
 
     @piece = Thread.current[:product_v8].eval("new CheckersPiece('B')")
