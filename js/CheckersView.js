@@ -25,6 +25,32 @@ CheckersView.prototype.wire_events = function()
 	this.canvas_element.addEventListener('click', this.handle_input.bind(this));
 }
 
+CheckersView.prototype.update_move_history = function()
+{
+	var moves = this.parent.move_history;
+	var move_display = document.getElementById("move_history");
+	var i = 0;
+	var html = "";
+
+	for (i = 0; i < moves.length; i++)
+	{
+		var j = 0;
+		html += "<li>"
+		for (j = 0; j < moves[i].length; j++)
+		{
+			html += "(" + rcstr(moves[i][j].src.r, moves[i][j].src.c) + ")";
+			html += "->"
+			html += "(" + rcstr(moves[i][j].dst.r, moves[i][j].dst.c) + ")";
+
+			if (j != moves[i].length - 1)
+				html += " --> "
+		}
+		html += "</li>"
+	}
+
+	move_display.innerHTML = html;
+}
+
 CheckersView.prototype.init = function()
 {
 	var board = this.parent.board;
@@ -103,6 +129,8 @@ CheckersView.prototype.handle_input = function(event)
 			var b = this.parent.board;
 			this.possible_moves = g.possible_moves(b, assocs, g.turn_values[this.parent.turn]);
 		}
+
+		this.update_move_history();
 	}
 };
 

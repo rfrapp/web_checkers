@@ -9,6 +9,8 @@ var Match = function(player1_ip, player2_ip)
 
 	var turn_chars = this.game.turn_values;
 
+	this.move_history = [];
+
 	this.simple_init_state = [
 	  [turn_chars[0], ' ', turn_chars[0], ' ', turn_chars[0], ' ', turn_chars[0], ' '],
 	  [' ', turn_chars[0], ' ', turn_chars[0], ' ', turn_chars[0], ' ', turn_chars[0]],
@@ -93,10 +95,12 @@ Match.prototype.get_notification = function(pos)
 			this.piece_tile_assocs = owl.deepCopy(move[2]);
 
 			// switch the turn 
-			// this.turn = (this.turn == 1) ? 0 : 1;
 			var turn_c = move[3];
-			console.log(move[3]);
 			this.turn = (turn_c == this.game.turn_values[1]) ? 0 : 1;
+
+			// record move sequence 
+			this.move_history.push(move[4]);
+			console.log(this.move_history);
 		}
 
 		this.state = 0;

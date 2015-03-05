@@ -188,7 +188,7 @@ CheckersGame.prototype.possible_moves = function(board, assocs, turn)
     return possible_moves;
 };
 
-CheckersGame.prototype.enforce_jumps = function(board, assocs, turn, switch_turn)
+CheckersGame.prototype.enforce_jumps = function(board, assocs, turn, switch_turn, move_sequence)
 {
     var jumps = this.possible_jumps(board, assocs, turn);
     var i = 0;
@@ -203,6 +203,9 @@ CheckersGame.prototype.enforce_jumps = function(board, assocs, turn, switch_turn
         var from = jumps[0].src, to = jumps[0].dst;
         this.move_piece(board, assocs, from.r, from.c, to.r, to.c);
         this.remove_piece(board, assocs, (from.r + to.r) / 2, (from.c + to.c) / 2);
+
+        // record the move
+        move_sequence.push({ src: {r: from.r, c: from.c}, dst: {r: to.r, c: to.c} });
 
         // swap turn
         // console.log('move forced');
@@ -222,7 +225,6 @@ CheckersGame.prototype.enforce_jumps = function(board, assocs, turn, switch_turn
 // (r1, c1) can be done
 CheckersGame.prototype.can_move = function(board, assocs, r0, c0, r1, c1, turn, enforce)
 {
-
     // check if input is correct
     if (r0 < 0 || r0 >= board.rows) return [false, ""];
     else if (c0 < 0 || c0 >= board.cols) return [false, ""];
@@ -230,15 +232,19 @@ CheckersGame.prototype.can_move = function(board, assocs, r0, c0, r1, c1, turn, 
     if (r1 < 0 || r1 >= board.rows) return [false, ""];
     else if (c1 < 0 || c1 >= board.cols) return [false, ""];
 
+    // copy board and associtions so the
+    // match state is not changed here
     var new_board = (owl.deepCopy(board));
     var new_assocs = (owl.deepCopy(assocs));
-    var tile0 = board.arr[r0][c0];
-    var tile1 = board.arr[r1][c1];
     var tile0_pass = false;
     var tile1_pass = false;
 
+    var move_sequence = [];
+
     tile0_pass = assocs[rcstr(r0, c0)].piece.value == turn;
     
+    // check if the move is either a forward move
+    // or a jump
     var is_move = this.is_move(board, assocs, r0, c0, r1, c1, turn);
     var is_jump = this.is_jump(board, assocs, r0, c0, r1, c1, turn);
     
@@ -252,19 +258,22 @@ CheckersGame.prototype.can_move = function(board, assocs, r0, c0, r1, c1, turn, 
         // move turn piece
         this.move_piece(new_board, new_assocs, r0, c0, r1, c1);
         
+        // record the move
+        move_sequence.push({ src: {r: r0, c: c0}, dst: {r: r1, c: c1} });
+
         // remove jumped piece
         this.remove_piece(new_board, new_assocs, mr, mc);
         
         if (enforce)
         {
             // enforce double/triple/etc jumps 
-            turn = this.enforce_jumps(new_board, new_assocs, turn, false);
+            turn = this.enforce_jumps(new_board, new_assocs, turn, false, move_sequence);
 
             // switch turn
             turn = (turn == this.turn_values[0]) ? this.turn_values[1] : this.turn_values[0];
 
             // enforce jump 
-            turn = this.enforce_jumps(new_board, new_assocs, turn, true);
+            turn = this.enforce_jumps(new_board, new_assocs, turn, true, move_sequence);
         }
 
         var ret = [true, new_board, new_assocs, turn];
@@ -272,6 +281,9 @@ CheckersGame.prototype.can_move = function(board, assocs, r0, c0, r1, c1, turn, 
     else if (is_move)
     {
         this.move_piece(new_board, new_assocs, r0, c0, r1, c1);
+
+        // record the move
+        move_sequence.push({ src: {r: r0, c: c0}, dst: {r: r1, c: c1} });
 
         if (enforce)
         {
@@ -281,7 +293,7 @@ CheckersGame.prototype.can_move = function(board, assocs, r0, c0, r1, c1, turn, 
             // console.log("checking jumps for " + turn);
 
             // enforce jump 
-            turn = this.enforce_jumps(new_board, new_assocs, turn, true);
+            turn = this.enforce_jumps(new_board, new_assocs, turn, true, move_sequence);
         }
 
         var ret = [true, new_board, new_assocs, turn];
@@ -306,6 +318,10 @@ CheckersGame.prototype.can_move = function(board, assocs, r0, c0, r1, c1, turn, 
             }
         }
     }
+
+    ret.push(move_sequence);
+    // console.log("move sequence:");
+    // console.log(move_sequence);
 
     return ret;
 };
