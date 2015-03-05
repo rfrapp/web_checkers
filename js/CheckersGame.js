@@ -267,7 +267,7 @@ CheckersGame.prototype.can_move = function(board, assocs, r0, c0, r1, c1, turn)
             a.tile.row == board.arr.length - 1 && 
             a.piece.value == this.turn_values[0])
         {
-            console.log("kinged");
+            // console.log("kinged");
             a.piece.king();
         }
     }

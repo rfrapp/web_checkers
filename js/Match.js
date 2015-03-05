@@ -22,6 +22,20 @@ var Match = function(player1_ip, player2_ip)
 	  [' ', turn_chars[1], ' ', turn_chars[1], ' ', turn_chars[1], ' ', turn_chars[1]],
 	];
 
+	// Test init state to show kinging
+	// this.simple_init_state = [
+	//   [turn_chars[0], ' ', ' ', ' ', turn_chars[0], ' ', turn_chars[0], ' '],
+	//   [' ', turn_chars[1], ' ', turn_chars[0], ' ', turn_chars[0], ' ', turn_chars[0]],
+	//   [turn_chars[0], ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+
+	//   [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+	//   [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+
+	//   [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+	//   [' ', ' ', turn_chars[0], ' ', turn_chars[1], ' ', turn_chars[1], ' '],
+	//   [' ', turn_chars[1], ' ', ' ', ' ', turn_chars[1], ' ', turn_chars[1]],
+	// ];
+
 	this.turn = 1;
 
 	// 0 = no piece selected
@@ -65,8 +79,8 @@ Match.prototype.get_notification = function(pos)
 
 		this.pos1 = pos;
 
-		console.log("(" + this.pos0.r + ", " + this.pos0.c + ")" + " " +
-					"(" + this.pos1.r + ", " + this.pos1.c + ")")
+		// console.log("(" + this.pos0.r + ", " + this.pos0.c + ")" + " " +
+		// 			"(" + this.pos1.r + ", " + this.pos1.c + ")")
 
 		var move = this.game.can_move(this.board, this.piece_tile_assocs, this.pos0.r, this.pos0.c, this.pos1.r, this.pos1.c, 
 				   					  this.game.turn_values[this.turn]);
