@@ -1,8 +1,8 @@
 
-var Match = function(x, y, w, h, canvas_element, player1_ip, player2_ip)
+var Match = function(player1_ip, player2_ip)
 {
 	this.game = new CheckersGame();
-	this.board = new Board(this, BOARD_ROWS, BOARD_COLS, 
+	this.board = new Board(BOARD_ROWS, BOARD_COLS, 
 	                       this.game.turn_values, null);
 	this.board.init();
 	this.piece_tile_assocs = {};
@@ -23,7 +23,6 @@ var Match = function(x, y, w, h, canvas_element, player1_ip, player2_ip)
 	];
 
 	this.turn = 1;
-	this.view = new CheckersView(this, x, y, w, h, canvas_element);
 
 	// 0 = no piece selected
 	// 1 = piece selected
@@ -49,6 +48,8 @@ Match.prototype.init = function()
 			}
 		}
 	}
+
+	// console.log(this.game.possible_moves(this.board, this.piece_tile_assocs, this.game.turn_values[this.turn]));
 };
 
 Match.prototype.get_notification = function(pos)
@@ -60,6 +61,8 @@ Match.prototype.get_notification = function(pos)
 	}
 	else
 	{
+		if (pos == this.pos0) return; 
+
 		this.pos1 = pos;
 
 		console.log("(" + this.pos0.r + ", " + this.pos0.c + ")" + " " +
@@ -71,38 +74,9 @@ Match.prototype.get_notification = function(pos)
 		// if requested move is valid
 		if (move[0])
 		{
-			var p0r = this.pos0.r;
-			var p0c = this.pos0.c;
-			var p1r = this.pos1.r;
-			var p1c = this.pos1.c;
-			var a = this.piece_tile_assocs[rcstr(p0r, p0c)];
-			a.tile = this.board.arr[this.pos1.r][this.pos1.c]
-
-			// Move source piece to destination 
-			this.piece_tile_assocs[rcstr(p1r, p1c)] = a;
-			
-			// Remove the old association 
-			delete this.piece_tile_assocs[rcstr(p0r, p0c)];
-
-			// If a piece reached the opponents side
-			if (a.tile.row == 0 && a.piece.value == this.game.turn_values[1] ||
-				a.tile.row == this.board.arr.length - 1 && 
-				a.piece.value == this.game.turn_values[0])
-			{
-				console.log("kinged");
-				a.piece.king();
-			}
-
-			// The move was a jump
-			if (move[1] == "jump")
-			{
-				// Get the position of the jumped piece
-				var r = (this.pos0.r + this.pos1.r) / 2;
-				var c = (this.pos0.c + this.pos1.c) / 2;
-
-				// Remove the association from the dictionary 
-				delete this.piece_tile_assocs[r.toString() + "," + c.toString()];
-			}
+			// retreive a copy of the board 
+			this.board = owl.deepCopy(move[1]);
+			this.piece_tile_assocs = owl.deepCopy(move[2]);
 
 			// switch the turn 
 			this.turn = (this.turn == 1) ? 0 : 1;
@@ -110,9 +84,4 @@ Match.prototype.get_notification = function(pos)
 
 		this.state = 0;
 	}
-}
-
-Match.prototype.play = function()
-{
-	this.view.draw();
 }

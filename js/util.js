@@ -28,6 +28,20 @@ function rcstr(row, col)
   return row.toString() + "," + col.toString();
 }
 
+// recursive function to clone an object. If a non object parameter
+// is passed in, that parameter is returned and no recursion occurs.
+ 
+function cloneObject(o) 
+{
+   var out, v, key;
+   out = Array.isArray(o) ? [] : {};
+   for (key in o) {
+       v = o[key];
+       out[key] = (typeof v === "object") ? cloneObject(v) : v;
+   }
+   return out;
+}
+
 Array.prototype.remove = function() 
 {
     var what, a = arguments, L = a.length, ax;

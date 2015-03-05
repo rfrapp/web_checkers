@@ -11,6 +11,9 @@ var CheckersView = function(parent, x, y, w, h, canvas_element)
 	this.king_image = new Image();
 	this.king_image.src = "images/crown-small.png";
 	this.king_img_loaded = false;
+	this.selected_piece_r = -1;
+	this.selected_piece_c = -1;
+	this.selected_tile_color = "#76A2F5";
 
 	this.init();
 	this.wire_events();
@@ -68,6 +71,9 @@ CheckersView.prototype.handle_input = function(event)
 		        {
 		            r = i;
 		            c = j;
+
+		            this.selected_piece_r = r;
+		            this.selected_piece_c = j;
 		            break;
 		        }
 		    }
@@ -77,6 +83,8 @@ CheckersView.prototype.handle_input = function(event)
 		    	{
 		    	    r = i;
 		    	    c = j;
+		    	    this.selected_piece_r = -1;
+		    	    this.selected_piece_c = -1;
 		    	    break;
 		    	}
 		    }
@@ -102,7 +110,7 @@ CheckersView.prototype.draw = function()
 		{
 			var rect = this.tile_rects[i][j];
 			var color = this.turn_colors[color_counter % this.turn_colors.length];
-			
+
 			draw_rectangle(this.context, {x: rect.x, y: rect.y}, rect.w, rect.h, color);
 			color_counter++;
 		}
@@ -110,6 +118,42 @@ CheckersView.prototype.draw = function()
 	}
 
 	var assocs = this.parent.piece_tile_assocs;
+	var possible = null;
+
+	if (this.selected_piece_r != -1 && this.selected_piece_c != -1)
+	{
+		var g = this.parent.game;
+		var b = this.parent.board;
+		possible = g.possible_moves(b, assocs, g.turn_values[this.parent.turn]);
+
+		var k = 0;
+		for (k = 0; k < possible.jumps.length; k++)
+		{
+			var move = possible.jumps[k];
+
+			if (move.src.r == this.selected_piece_r && 
+				move.src.c == this.selected_piece_c)
+			{
+				var rect = this.tile_rects[move.dst.r][move.dst.c];
+				var color = this.selected_tile_color;
+				draw_rectangle(this.context, {x: rect.x, y: rect.y}, rect.w, rect.h, color);
+			}
+		}
+
+		var k = 0;
+		for (k = 0; k < possible.forward.length; k++)
+		{
+			var move = possible.forward[k];
+
+			if (move.src.r == this.selected_piece_r && 
+				move.src.c == this.selected_piece_c)
+			{
+				var rect = this.tile_rects[move.dst.r][move.dst.c];
+				var color = this.selected_tile_color;
+				draw_rectangle(this.context, {x: rect.x, y: rect.y}, rect.w, rect.h, color);
+			}
+		}
+	}
 
 	// for (i = 0; i < assocs.length; i++)
 	for (key in assocs)
