@@ -73,17 +73,17 @@ Match.prototype.get_notification = function(pos)
 		this.pos0 = pos;
 		this.state = 1;
 	}
-	else
+	else if (this.state == 1)
 	{
 		if (pos == this.pos0) return; 
 
 		this.pos1 = pos;
 
-		// console.log("(" + this.pos0.r + ", " + this.pos0.c + ")" + " " +
-		// 			"(" + this.pos1.r + ", " + this.pos1.c + ")")
+		console.log("(" + this.pos0.r + ", " + this.pos0.c + ")" + " " +
+					"(" + this.pos1.r + ", " + this.pos1.c + ")")
 
 		var move = this.game.can_move(this.board, this.piece_tile_assocs, this.pos0.r, this.pos0.c, this.pos1.r, this.pos1.c, 
-				   					  this.game.turn_values[this.turn]);
+				   					  this.game.turn_values[this.turn], true);
 		
 		// if requested move is valid
 		if (move[0])
@@ -93,7 +93,10 @@ Match.prototype.get_notification = function(pos)
 			this.piece_tile_assocs = owl.deepCopy(move[2]);
 
 			// switch the turn 
-			this.turn = (this.turn == 1) ? 0 : 1;
+			// this.turn = (this.turn == 1) ? 0 : 1;
+			var turn_c = move[3];
+			console.log(move[3]);
+			this.turn = (turn_c == this.game.turn_values[1]) ? 0 : 1;
 		}
 
 		this.state = 0;

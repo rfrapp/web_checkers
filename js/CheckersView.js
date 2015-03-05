@@ -14,6 +14,7 @@ var CheckersView = function(parent, x, y, w, h, canvas_element)
 	this.selected_piece_r = -1;
 	this.selected_piece_c = -1;
 	this.selected_tile_color = "#76A2F5";
+	this.possible_moves = null;
 
 	this.init();
 	this.wire_events();
@@ -95,6 +96,13 @@ CheckersView.prototype.handle_input = function(event)
 	{
 		console.log("here");
 		this.parent.get_notification({r: r, c: c});
+
+		if (this.parent.state == 1)
+		{
+			var g = this.parent.game;
+			var b = this.parent.board;
+			this.possible_moves = g.possible_moves(b, assocs, g.turn_values[this.parent.turn]);
+		}
 	}
 };
 
@@ -122,9 +130,7 @@ CheckersView.prototype.draw = function()
 
 	if (this.selected_piece_r != -1 && this.selected_piece_c != -1)
 	{
-		var g = this.parent.game;
-		var b = this.parent.board;
-		possible = g.possible_moves(b, assocs, g.turn_values[this.parent.turn]);
+		possible = this.possible_moves;
 
 		var k = 0;
 		for (k = 0; k < possible.jumps.length; k++)
