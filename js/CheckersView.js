@@ -36,15 +36,9 @@ CheckersView.prototype.update_move_history = function()
 	{
 		var j = 0;
 		html += "<li>"
-		for (j = 0; j < moves[i].length; j++)
-		{
-			html += "(" + rcstr(moves[i][j].src.r, moves[i][j].src.c) + ")";
-			html += "->"
-			html += "(" + rcstr(moves[i][j].dst.r, moves[i][j].dst.c) + ")";
-
-			if (j != moves[i].length - 1)
-				html += " --> "
-		}
+		html += "(" + rcstr(moves[i].src.r, moves[i].src.c) + ")";
+		html += " -> "
+		html += "(" + rcstr(moves[i].dst.r, moves[i].dst.c) + ")";
 		html += "</li>"
 	}
 
@@ -87,47 +81,64 @@ CheckersView.prototype.handle_input = function(event)
 	{
 	    for (j = 0; j < board.cols; j++)
 	    {
-	    	if (this.parent.state == 0)
-	    	{
+	    	// if (this.parent.state == 0)
+	    	// {
 	    		var a = assocs[i.toString() + "," + j.toString()];
 
-	    		if (!a) continue;
+	    		// if (!a) continue;
 
+	    		// space selected, clear selection
+	    		if (rects[i][j].collide_point(mouse_pos.x, mouse_pos.y)
+	    			&& !a)
+	    		{
+	    		    r = i;
+	    		    c = j;
+	    		    this.selected_piece_r = -1;
+	    		    this.selected_piece_c = -1;
+	    		    break;
+	    		}
+
+	    		// if the clicked tile has a piece
+	    		// and the piece is the same as the turn
 		        if (rects[i][j].collide_point(mouse_pos.x, mouse_pos.y) &&
 		        	a.piece.value == this.parent.game.turn_values[this.parent.turn])
 		        {
 		            r = i;
 		            c = j;
 
-		            this.selected_piece_r = r;
+		            this.selected_piece_r = i;
 		            this.selected_piece_c = j;
 		            break;
 		        }
-		    }
-		    else
-		    {
-		    	if (rects[i][j].collide_point(mouse_pos.x, mouse_pos.y))
-		    	{
-		    	    r = i;
-		    	    c = j;
-		    	    this.selected_piece_r = -1;
-		    	    this.selected_piece_c = -1;
-		    	    break;
-		    	}
-		    }
+		    // }
+		    // else
+		    // {
+		    // 	if (rects[i][j].collide_point(mouse_pos.x, mouse_pos.y))
+		    // 	{
+		    // 	    r = i;
+		    // 	    c = j;
+		    // 	    this.selected_piece_r = -1;
+		    // 	    this.selected_piece_c = -1;
+		    // 	    break;
+		    // 	}
+		    // }
 	    }
 	}
 
 	if (r != -1 && c != -1)
 	{
 		console.log("here");
+
 		this.parent.get_notification({r: r, c: c});
 
-		if (this.parent.state == 1)
+		if (this.parent.is_possible_src(r, c) && this.parent.state == 1)
 		{
-			var g = this.parent.game;
-			var b = this.parent.board;
-			this.possible_moves = g.possible_moves(b, assocs, g.turn_values[this.parent.turn]);
+			this.possible_moves = this.parent.possible_moves;
+			console.log(this.possible_moves);
+		}
+		else if (this.parent.state == 0)
+		{
+			this.possible_moves = [];
 		}
 
 		this.update_move_history();
@@ -159,32 +170,23 @@ CheckersView.prototype.draw = function()
 	if (this.selected_piece_r != -1 && this.selected_piece_c != -1)
 	{
 		possible = this.possible_moves;
+		// console.log("possible:");
+		// console.log(possible);
 
-		var k = 0;
-		for (k = 0; k < possible.jumps.length; k++)
+		if (possible)
 		{
-			var move = possible.jumps[k];
-
-			if (move.src.r == this.selected_piece_r && 
-				move.src.c == this.selected_piece_c)
+			var k = 0;
+			for (k = 0; k < possible.length; k++)
 			{
-				var rect = this.tile_rects[move.dst.r][move.dst.c];
-				var color = this.selected_tile_color;
-				draw_rectangle(this.context, {x: rect.x, y: rect.y}, rect.w, rect.h, color);
-			}
-		}
+				var move = possible[k];
 
-		var k = 0;
-		for (k = 0; k < possible.forward.length; k++)
-		{
-			var move = possible.forward[k];
-
-			if (move.src.r == this.selected_piece_r && 
-				move.src.c == this.selected_piece_c)
-			{
-				var rect = this.tile_rects[move.dst.r][move.dst.c];
-				var color = this.selected_tile_color;
-				draw_rectangle(this.context, {x: rect.x, y: rect.y}, rect.w, rect.h, color);
+				if (move.src.r == this.selected_piece_r && 
+					move.src.c == this.selected_piece_c)
+				{
+					var rect = this.tile_rects[move.dst.r][move.dst.c];
+					var color = this.selected_tile_color;
+					draw_rectangle(this.context, {x: rect.x, y: rect.y}, rect.w, rect.h, color);
+				}
 			}
 		}
 	}

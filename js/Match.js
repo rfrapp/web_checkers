@@ -1,7 +1,7 @@
 
 var Match = function(player1_ip, player2_ip)
 {
-	this.game = new CheckersGame();
+	this.game  = new CheckersGame();
 	this.board = new Board(BOARD_ROWS, BOARD_COLS, 
 	                       this.game.turn_values, null);
 	this.board.init();
@@ -10,6 +10,7 @@ var Match = function(player1_ip, player2_ip)
 	var turn_chars = this.game.turn_values;
 
 	this.move_history = [];
+	this.possible_moves = [];
 
 	this.simple_init_state = [
 	  [turn_chars[0], ' ', turn_chars[0], ' ', turn_chars[0], ' ', turn_chars[0], ' '],
@@ -25,20 +26,20 @@ var Match = function(player1_ip, player2_ip)
 	];
 
 	// Test init state to show kinging
-	// this.simple_init_state = [
-	//   [turn_chars[0], ' ', ' ', ' ', turn_chars[0], ' ', turn_chars[0], ' '],
-	//   [' ', turn_chars[1], ' ', turn_chars[0], ' ', turn_chars[0], ' ', turn_chars[0]],
-	//   [turn_chars[0], ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+	this.simple_init_state = [
+	  [' ', ' ', ' ', ' ', turn_chars[0], ' ', turn_chars[0], ' '],
+	  [' ', turn_chars[1], ' ', turn_chars[0], ' ', turn_chars[0], ' ', turn_chars[0]],
+	  [turn_chars[0], ' ', ' ', ' ', ' ', ' ', ' ', ' '],
 
-	//   [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-	//   [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+	  [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+	  [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
 
-	//   [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-	//   [' ', ' ', turn_chars[0], ' ', turn_chars[1], ' ', turn_chars[1], ' '],
-	//   [' ', turn_chars[1], ' ', ' ', ' ', turn_chars[1], ' ', turn_chars[1]],
-	// ];
+	  [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+	  [' ', ' ', turn_chars[0], ' ', turn_chars[1], ' ', turn_chars[1], ' '],
+	  [' ', turn_chars[1], ' ', ' ', ' ', turn_chars[1], ' ', turn_chars[1]],
+	];
 
-	this.turn = 1;
+	this.turn = 0;
 
 	// 0 = no piece selected
 	// 1 = piece selected
@@ -47,6 +48,18 @@ var Match = function(player1_ip, player2_ip)
 	this.pos1 = null;
 
 	this.init();
+};
+
+Match.prototype.is_possible_src = function(r, c)
+{
+	var i = 0;
+	for (i = 0; i < this.possible_moves.length; i++)
+	{
+		if (this.possible_moves[i].src.r == r &&
+			this.possible_moves[i].src.c == c)
+			return true;
+	}
+	return false;
 };
 
 Match.prototype.init = function()
@@ -65,7 +78,8 @@ Match.prototype.init = function()
 		}
 	}
 
-	// console.log(this.game.possible_moves(this.board, this.piece_tile_assocs, this.game.turn_values[this.turn]));
+	this.possible_moves = this.game.possible_moves(this.board, this.piece_tile_assocs,
+												   this.game.turn_values[this.turn]);
 };
 
 Match.prototype.get_notification = function(pos)
@@ -74,33 +88,75 @@ Match.prototype.get_notification = function(pos)
 	{
 		this.pos0 = pos;
 		this.state = 1;
+		this.possible_moves = this.game.possible_moves(this.board, this.piece_tile_assocs,
+													   this.game.turn_values[this.turn]);
 	}
 	else if (this.state == 1)
 	{
-		if (pos == this.pos0) return; 
+		if (this.piece_tile_assocs[rcstr(pos.r, pos.c)] !== undefined)
+		{
+			this.pos0 = pos;
+			this.state = 1;
+			this.possible_moves = this.game.possible_moves(this.board, this.piece_tile_assocs,
+														   this.game.turn_values[this.turn]);
+			
+			console.log("found piece");
+			return;
+		}
 
 		this.pos1 = pos;
 
-		console.log("(" + this.pos0.r + ", " + this.pos0.c + ")" + " " +
-					"(" + this.pos1.r + ", " + this.pos1.c + ")")
+		// console.log("(" + this.pos0.r + ", " + this.pos0.c + ")" + " " +
+		// 			"(" + this.pos1.r + ", " + this.pos1.c + ")")
 
-		var move = this.game.can_move(this.board, this.piece_tile_assocs, this.pos0.r, this.pos0.c, this.pos1.r, this.pos1.c, 
-				   					  this.game.turn_values[this.turn], true);
+		var move = this.game.is_valid_move(this.board, this.piece_tile_assocs, this.pos0.r, this.pos0.c, this.pos1.r, this.pos1.c, 
+				   					  	   this.game.turn_values[this.turn], true);
 		
 		// if requested move is valid
-		if (move[0])
+		if (move)
 		{
-			// retreive a copy of the board 
-			this.board = owl.deepCopy(move[1]);
-			this.piece_tile_assocs = owl.deepCopy(move[2]);
-
-			// switch the turn 
-			var turn_c = move[3];
-			this.turn = (turn_c == this.game.turn_values[1]) ? 0 : 1;
+			// tell board to make the move
+			var m = this.board.make_move(this.piece_tile_assocs, this.pos0.r, this.pos0.c,
+								 		 this.pos1.r, this.pos1.c);
 
 			// record move sequence 
-			this.move_history.push(move[4]);
-			console.log(this.move_history);
+			this.move_history.push({ src: { r: this.pos0.r, c: this.pos0.c }, 
+									 dst: { r: this.pos1.r, c: this.pos1.c } });
+		
+			var pjumps = this.game.possible_jumps(this.board, 
+										 this.piece_tile_assocs, 
+										 this.game.turn_values[this.turn]);
+
+			console.log(m);
+
+			if (m == "jump")
+			{
+				console.log("jump made");
+				if (pjumps.length == 0)
+				{
+					console.log("switched turn");
+					// switch the turn
+					this.turn = (this.turn == 1) ? 0 : 1;
+				}
+				else 
+				{
+					var filtered = pjumps;
+					var i = 0;
+
+					for (i = 0; i < pjumps.length; i++)
+					{
+						if (pjumps[i].src != this.pos1)
+							filtered.remove(filtered[i]);
+					}
+
+					this.possible_moves = filtered;
+				}
+			}
+			else if (m == "move")
+			{
+				// switch the turn
+				this.turn = (this.turn == 1) ? 0 : 1;
+			}
 		}
 
 		this.state = 0;

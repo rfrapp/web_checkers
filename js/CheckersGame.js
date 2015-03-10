@@ -57,7 +57,7 @@ CheckersGame.prototype.is_jump = function(board, assocs, r0, c0, r1, c1, turn)
 
         var middle_val = assocs[rcstr(r, c)].piece.value;
 
-        is_jump = (r1 - r0 == -2 || (r1 - r0 == 2 && piece.is_king)) &&
+        is_jump = (r1 - r0 == -2 || (r1 - r0 == 2 && a.piece.is_king)) &&
                   (Math.abs(c1 - c0) == 2) && middle_val == this.other_turn_char(turn) && !a1;
     }
 
@@ -89,19 +89,19 @@ CheckersGame.prototype.is_move = function(board, assocs, r0, c0, r1, c1, turn)
     return is_move; 
 };
 
-CheckersGame.prototype.move_piece = function(board, assocs, r0, c0, r1, c1)
-{
-    var a0 = assocs[rcstr(r0, c0)];
-    a0.tile = board.arr[r1][c1];
+// CheckersGame.prototype.move_piece = function(board, assocs, r0, c0, r1, c1)
+// {
+//     var a0 = assocs[rcstr(r0, c0)];
+//     a0.tile = board.arr[r1][c1];
 
-    delete assocs[rcstr(r0, c0)];
-    assocs[rcstr(r1, c1)] = a0;
-};
+//     delete assocs[rcstr(r0, c0)];
+//     assocs[rcstr(r1, c1)] = a0;
+// };
 
-CheckersGame.prototype.remove_piece = function(board, assocs, r, c)
-{
-    delete assocs[rcstr(r, c)];
-};
+// CheckersGame.prototype.remove_piece = function(board, assocs, r, c)
+// {
+//     delete assocs[rcstr(r, c)];
+// };
 
 CheckersGame.prototype.possible_jumps = function(board, assocs, turn)
 {
@@ -118,20 +118,20 @@ CheckersGame.prototype.possible_jumps = function(board, assocs, turn)
             var c0 = t.col - 2;
             var c1 = t.col + 2;
 
-            if (this.can_move(board, assocs, t.row, t.col, r, c0, turn, false)[0])
+            if (this.is_valid_move(board, assocs, t.row, t.col, r, c0, turn))
                 possible_moves.push({ src: {r: t.row, c: t.col}, dst: {r: r, c: c0}});
 
-            if (this.can_move(board, assocs, t.row, t.col, r, c1, turn, false)[0])
+            if (this.is_valid_move(board, assocs, t.row, t.col, r, c1, turn))
                 possible_moves.push({ src: {r: t.row, c: t.col}, dst: {r: r, c: c1}});
 
             if (assocs[key].piece.is_king)
             {
                 r = t.row - rdiff;
 
-                if (this.can_move(board, assocs, t.row, t.col, r, c0, turn, false)[0])
+                if (this.is_valid_move(board, assocs, t.row, t.col, r, c0, turn))
                     possible_moves.push({ src: {r: t.row, c: t.col}, dst: {r: r, c: c0}});
 
-                if (this.can_move(board, assocs, t.row, t.col, r, c1, turn, false)[0])
+                if (this.is_valid_move(board, assocs, t.row, t.col, r, c1, turn))
                     possible_moves.push({ src: {r: t.row, c: t.col}, dst: {r: r, c: c1}});                
             }
         }
@@ -156,20 +156,20 @@ CheckersGame.prototype.possible_forward_moves = function(board, assocs, turn)
             var c0 = t.col - 1;
             var c1 = t.col + 1;
 
-            if (this.can_move(board, assocs, t.row, t.col, r, c0, turn, false)[0])
+            if (this.is_valid_move(board, assocs, t.row, t.col, r, c0, turn))
                 possible_moves.push({ src: {r: t.row, c: t.col}, dst: {r: r, c: c0}});
 
-            if (this.can_move(board, assocs, t.row, t.col, r, c1, turn, false)[0])
+            if (this.is_valid_move(board, assocs, t.row, t.col, r, c1, turn))
                 possible_moves.push({ src: {r: t.row, c: t.col}, dst: {r: r, c: c1}});
 
             if (assocs[key].piece.is_king)
             {
                 r = t.row - rdiff;
 
-                if (this.can_move(board, assocs, t.row, t.col, r, c0, turn, false)[0])
+                if (this.is_valid_move(board, assocs, t.row, t.col, r, c0, turn))
                     possible_moves.push({ src: {r: t.row, c: t.col}, dst: {r: r, c: c0}});
 
-                if (this.can_move(board, assocs, t.row, t.col, r, c1, turn, false)[0])
+                if (this.is_valid_move(board, assocs, t.row, t.col, r, c1, turn))
                     possible_moves.push({ src: {r: t.row, c: t.col}, dst: {r: r, c: c1}});                
             }
         }
@@ -180,150 +180,41 @@ CheckersGame.prototype.possible_forward_moves = function(board, assocs, turn)
 
 CheckersGame.prototype.possible_moves = function(board, assocs, turn)
 {
-    var possible_moves = {};
+    var possible_moves = new Array();
 
-    possible_moves.jumps = this.possible_jumps(board, assocs, turn);
-    possible_moves.forward = this.possible_forward_moves(board, assocs, turn);
+    possible_moves = possible_moves.concat(this.possible_jumps(board, assocs, turn));
+    
+    if (possible_moves.length == 0)
+        possible_moves = possible_moves.concat(this.possible_forward_moves(board, assocs, turn));
 
     return possible_moves;
 };
 
-CheckersGame.prototype.enforce_jumps = function(board, assocs, turn, switch_turn, move_sequence)
+CheckersGame.prototype.is_valid_move = function(board, assocs, r0, c0, r1, c1, turn)
 {
-    var jumps = this.possible_jumps(board, assocs, turn);
-    var i = 0;
+    // console.log("r0: " + r0.toString() + " c0: " + c0.toString());
+    // console.log("r1: " + r1.toString() + " c1: " + c1.toString());
 
-    console.log("jumps: ");
-    console.log(jumps);
-
-    // 1 jump available, force it to happen
-    if (jumps.length == 1)
-    {
-        console.log(jumps[0]);
-        var from = jumps[0].src, to = jumps[0].dst;
-        this.move_piece(board, assocs, from.r, from.c, to.r, to.c);
-        this.remove_piece(board, assocs, (from.r + to.r) / 2, (from.c + to.c) / 2);
-
-        // record the move
-        move_sequence.push({ src: {r: from.r, c: from.c}, dst: {r: to.r, c: to.c} });
-
-        // swap turn
-        // console.log('move forced');
-    }
-    else if (switch_turn)
-    {
-        // console.log("turn was " + turn);
-        turn = (turn == this.turn_values[0]) ? this.turn_values[1] : this.turn_values[0];
-        // console.log("turn is now " + turn);
-    }
-
-    return turn;
-};
-
-// Validates whether or not moving the piece
-// in the tile at (r0, c0) to the tile at 
-// (r1, c1) can be done
-CheckersGame.prototype.can_move = function(board, assocs, r0, c0, r1, c1, turn, enforce)
-{
     // check if input is correct
-    if (r0 < 0 || r0 >= board.rows) return [false, ""];
-    else if (c0 < 0 || c0 >= board.cols) return [false, ""];
+    if (r0 < 0 || r0 >= board.rows)      return false;
+    else if (c0 < 0 || c0 >= board.cols) return false;
 
-    if (r1 < 0 || r1 >= board.rows) return [false, ""];
-    else if (c1 < 0 || c1 >= board.cols) return [false, ""];
+    if (r1 < 0 || r1 >= board.rows)      return false;
+    else if (c1 < 0 || c1 >= board.cols) return false;
 
     // copy board and associtions so the
     // match state is not changed here
-    var new_board = (owl.deepCopy(board));
+    var new_board  = (owl.deepCopy(board));
     var new_assocs = (owl.deepCopy(assocs));
     var tile0_pass = false;
     var tile1_pass = false;
 
-    var move_sequence = [];
+    tile0_pass     = assocs[rcstr(r0, c0)].piece.value == turn;
 
-    tile0_pass = assocs[rcstr(r0, c0)].piece.value == turn;
+    var is_move    = this.is_move(board, assocs, r0, c0, r1, c1, turn);
+    var is_jump    = this.is_jump(board, assocs, r0, c0, r1, c1, turn);
     
-    // check if the move is either a forward move
-    // or a jump
-    var is_move = this.is_move(board, assocs, r0, c0, r1, c1, turn);
-    var is_jump = this.is_jump(board, assocs, r0, c0, r1, c1, turn);
-    
-    tile1_pass = is_move || is_jump;
+    tile1_pass     = is_move || is_jump;
 
-    if (is_jump)
-    {
-        // get r,c for piece to remove
-        var mr = (r0 + r1) / 2, mc = (c0 + c1) / 2;
-        
-        // move turn piece
-        this.move_piece(new_board, new_assocs, r0, c0, r1, c1);
-        
-        // record the move
-        move_sequence.push({ src: {r: r0, c: c0}, dst: {r: r1, c: c1} });
-
-        // remove jumped piece
-        this.remove_piece(new_board, new_assocs, mr, mc);
-        
-        if (enforce)
-        {
-            // enforce double/triple/etc jumps 
-            turn = this.enforce_jumps(new_board, new_assocs, turn, false, move_sequence);
-
-            // switch turn
-            turn = (turn == this.turn_values[0]) ? this.turn_values[1] : this.turn_values[0];
-
-            // enforce jump 
-            turn = this.enforce_jumps(new_board, new_assocs, turn, true, move_sequence);
-        }
-
-        var ret = [true, new_board, new_assocs, turn];
-    }
-    else if (is_move)
-    {
-        this.move_piece(new_board, new_assocs, r0, c0, r1, c1);
-
-        // record the move
-        move_sequence.push({ src: {r: r0, c: c0}, dst: {r: r1, c: c1} });
-
-        if (enforce)
-        {
-            // switch turn
-            turn = (turn == this.turn_values[0]) ? this.turn_values[1] : this.turn_values[0];
-
-            // console.log("checking jumps for " + turn);
-
-            // enforce jump 
-            turn = this.enforce_jumps(new_board, new_assocs, turn, true, move_sequence);
-        }
-
-        var ret = [true, new_board, new_assocs, turn];
-    }
-    else 
-        var ret = [false, "", turn];
-
-    // check to king a piece 
-    if (tile1_pass)
-    {
-        var a = new_assocs[rcstr(r1, c1)];
-        // console.log("a:" + a);
-        if (a !== undefined)
-        {
-            // If a piece reached the opponents side
-            if (a.tile.row == 0 && a.piece.value == this.turn_values[1] ||
-                a.tile.row == board.arr.length - 1 && 
-                a.piece.value == this.turn_values[0])
-            {
-                // console.log("kinged");
-                a.piece.king();
-            }
-        }
-    }
-
-    ret.push(move_sequence);
-    // console.log("move sequence:");
-    // console.log(move_sequence);
-
-    return ret;
+    return tile0_pass && tile1_pass;
 };
-
-
