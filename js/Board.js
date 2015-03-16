@@ -32,9 +32,9 @@ Board.prototype.make_move = function(r0, c0, r1, c1)
 		type = "move";
 
 	// king a piece
-	if ((this.piece_tile_assocs[rcstr(r1, c1)].piece.value == "B" && 
+	if ((this.piece_tile_assocs[rcstr(r1, c1)].piece.value == this.turn_chars[0] && 
 			this.piece_tile_assocs[rcstr(r1, c1)].tile.row == this.rows - 1) ||
-		(this.piece_tile_assocs[rcstr(r1, c1)].piece.value == "R" && 
+		(this.piece_tile_assocs[rcstr(r1, c1)].piece.value == this.turn_chars[1] && 
 				this.piece_tile_assocs[rcstr(r1, c1)].tile.row == 0))
 	{
 		this.piece_tile_assocs[rcstr(r1, c1)].piece.king();

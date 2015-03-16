@@ -16,53 +16,32 @@ var Match = function(player1_ip, player2_ip)
 	this.pieces = [];
 
 	this.simple_init_state = [
-	  [turn_chars[0], ' ', turn_chars[0], ' ', turn_chars[0], ' ', turn_chars[0], ' '],
 	  [' ', turn_chars[0], ' ', turn_chars[0], ' ', turn_chars[0], ' ', turn_chars[0]],
 	  [turn_chars[0], ' ', turn_chars[0], ' ', turn_chars[0], ' ', turn_chars[0], ' '],
+	  [' ', turn_chars[0], ' ', turn_chars[0], ' ', turn_chars[0], ' ', turn_chars[0]],
 
 	  [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
 	  [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
 
-	  [' ', turn_chars[1], ' ', turn_chars[1], ' ', turn_chars[1], ' ', turn_chars[1]],
 	  [turn_chars[1], ' ', turn_chars[1], ' ', turn_chars[1], ' ', turn_chars[1], ' '],
 	  [' ', turn_chars[1], ' ', turn_chars[1], ' ', turn_chars[1], ' ', turn_chars[1]],
+	  [turn_chars[1], ' ', turn_chars[1], ' ', turn_chars[1], ' ', turn_chars[1], ' '],
 	];
 
 	// Test init state to show kinging
+	// this.simple_init_state = [
 	this.simple_init_state = [
-	  [' ', ' ', ' ', ' ', turn_chars[0], ' ', turn_chars[0], ' '],
-	  [' ', turn_chars[1], ' ', turn_chars[0], ' ', turn_chars[0], ' ', turn_chars[0]],
-	  [turn_chars[0], ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-
-	  [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+	  [' ', turn_chars[0], ' ', ' ', ' ', turn_chars[0], ' ', turn_chars[0]],
+	  [' ', ' ', turn_chars[1], ' ', turn_chars[0], ' ', turn_chars[0], ' '],
 	  [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
 
 	  [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-	  [' ', ' ', turn_chars[0], ' ', turn_chars[1], ' ', turn_chars[1], ' '],
-	  [' ', turn_chars[1], ' ', ' ', ' ', turn_chars[1], ' ', turn_chars[1]],
+	  [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+
+	  [turn_chars[1], ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+	  [' ', turn_chars[0], ' ', turn_chars[1], ' ', turn_chars[1], ' ', turn_chars[1]],
+	  [' ', ' ', ' ', ' ', turn_chars[1], ' ', turn_chars[1], ' '],
 	];
-
-	// test move history: shows branching double jump choice
-	// (2,0) -> (3,1)
-	// (7,1) -> (5,3)
-	// (3,1) -> (4,0)
-	// (5,3) -> (4,4)
-	// (4,0) -> (5,1)
-	// (6,4) -> (5,3)
-	// (5,1) -> (6,2)
-	// (5,3) -> (4,2)
-	// (6,2) -> (7,3)
-	// (1,1) -> (0,2)
-	// (7,3) -> (6,4)
-	// (7,5) -> (5,3)
-	// (0,2) -> (2,4)
-	// (1,5) -> (3,3)
-	// (3,3) -> (5,1)
-	// (5,3) -> (4,2)
-	// (5,1) -> (6,2)
-	// (4,4) -> (3,3)
-	// (6,2) -> (7,3)
-	// (4,2) -> (3,1)
 
 	this.turn = 0;
 
@@ -101,7 +80,7 @@ Match.prototype.init = function()
 				var t = this.board.arr[i][j];
 				this.pieces.push(p);
 				this.board.add_piece(p, i, j);
-				// this.piece_tile_assocs[i.toString() + "," + j.toString()] = new PieceTileAssociation(p, t);
+				// this.piece_tile_assocs[i.toString() + "," + j.toString()] = new PieceTile' 'ssociation(p, t);
 			}
 		}
 	}

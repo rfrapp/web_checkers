@@ -149,7 +149,7 @@ CheckersView.prototype.handle_input = function(event)
 CheckersView.prototype.draw = function()
 {
 	var board = this.parent.board;
-	var color_counter = 0;
+	var color_counter = 1;
 	this.context.font = '40pt Verdana';
 	var game = this.parent.game;
 	var turn = game.turn_values[this.parent.turn];
@@ -219,7 +219,7 @@ CheckersView.prototype.draw = function()
 			var a = assocs[key];
 			var cx = this.rect.x + a.tile.col * TILE_WIDTH + TILE_WIDTH / 2;
 			var cy = this.rect.y + a.tile.row * TILE_HEIGHT + TILE_HEIGHT / 2;
-			var color = (a.piece.value == "B") ? this.turn_colors[0] : this.turn_colors[1];
+			var color = (a.piece.value == this.parent.game.turn_values[0]) ? this.turn_colors[0] : this.turn_colors[1];
 
 			draw_filled_circle(this.context, {x: cx, y: cy}, 
 							   (TILE_WIDTH - 10) / 2, color, 1, "#ffff66");

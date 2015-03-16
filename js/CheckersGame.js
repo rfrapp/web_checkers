@@ -4,7 +4,7 @@ var CheckersGame = function()
   // Initialize the super class 
   Game.call(this);
 
-  this.turn_values = ["B", "R"];
+  this.turn_values = ["b", "r"];
 };
 
 CheckersGame.prototype.other_turn_char = function(turn_char)
@@ -44,9 +44,9 @@ CheckersGame.prototype.is_jump = function(board, r0, c0, r1, c1, turn)
         // no middle tile association existed 
         if (!assocs[rcstr(r, c)]) return false;
 
-        var middle_val = assocs[r.toString() + "," + c.toString()].piece.value;
+        var middle_val = assocs[rcstr(r, c)].piece.value;
 
-        is_jump = (r1 - r0 == 2 || (r1 - r0 == -2 && piece.is_king)) &&
+        is_jump = (r1 - r0 == 2 || (r1 - r0 == -2 && a.piece.is_king)) &&
                   (Math.abs(c1 - c0) == 2) && middle_val == this.other_turn_char(turn) && !a1;
     }
     else if (a.piece.value == this.turn_values[1])
