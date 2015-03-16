@@ -127,14 +127,14 @@ CheckersView.prototype.handle_input = function(event)
 
 	if (r != -1 && c != -1)
 	{
-		console.log("here");
+		// console.log("here");
 
 		this.parent.get_notification({r: r, c: c});
 
 		if (this.parent.is_possible_src(r, c) && this.parent.state == 1)
 		{
 			this.possible_moves = this.parent.possible_moves;
-			console.log(this.possible_moves);
+			// console.log(this.possible_moves);
 		}
 		else if (this.parent.state == 0)
 		{
@@ -142,6 +142,7 @@ CheckersView.prototype.handle_input = function(event)
 		}
 
 		this.update_move_history();
+		this.draw();
 	}
 };
 
@@ -149,6 +150,25 @@ CheckersView.prototype.draw = function()
 {
 	var board = this.parent.board;
 	var color_counter = 0;
+	this.context.font = '40pt Verdana';
+	var game = this.parent.game;
+	var turn = game.turn_values[this.parent.turn];
+	var print_v = turn;
+
+	// Set fill color
+	this.context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+	// Draw text to indicate who's turn it is	
+	if (!this.parent.game_over)
+	{
+		this.context.fillStyle = "black";
+		this.context.fillText(print_v + "'s turn", 10, 40);
+	}
+	else
+	{
+		this.context.fillStyle = "black";
+		this.context.fillText(this.parent.winner + " won!", 10, 40);	
+	}
 
 	// Draw the tile rects
 	for (i = 0; i < board.rows; i++)
@@ -197,8 +217,8 @@ CheckersView.prototype.draw = function()
 		if (assocs.hasOwnProperty(key))
 		{
 			var a = assocs[key];
-			var cx = a.tile.col * TILE_WIDTH + TILE_WIDTH / 2;
-			var cy = a.tile.row * TILE_HEIGHT + TILE_HEIGHT / 2;
+			var cx = this.rect.x + a.tile.col * TILE_WIDTH + TILE_WIDTH / 2;
+			var cy = this.rect.y + a.tile.row * TILE_HEIGHT + TILE_HEIGHT / 2;
 			var color = (a.piece.value == "B") ? this.turn_colors[0] : this.turn_colors[1];
 
 			draw_filled_circle(this.context, {x: cx, y: cy}, 
@@ -206,8 +226,8 @@ CheckersView.prototype.draw = function()
 
 			if (a.piece.is_king)
 			{
-				var x = a.tile.col * TILE_WIDTH + this.king_image.width / 2;
-				var y = a.tile.row * TILE_HEIGHT + this.king_image.height / 2;
+				var x = this.rect.x + a.tile.col * TILE_WIDTH + this.king_image.width / 2;
+				var y = this.rect.y + a.tile.row * TILE_HEIGHT + this.king_image.height / 2;
 				this.context.drawImage(this.king_image, x, y);
 			}
 		}

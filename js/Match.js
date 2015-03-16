@@ -7,6 +7,9 @@ var Match = function(player1_ip, player2_ip)
 	this.board.init();
 	this.piece_tile_assocs = {};
 
+	this.game_over = false;
+	this.winner = 0;
+
 	var turn_chars = this.game.turn_values;
 
 	this.move_history = [];
@@ -38,6 +41,28 @@ var Match = function(player1_ip, player2_ip)
 	  [' ', ' ', turn_chars[0], ' ', turn_chars[1], ' ', turn_chars[1], ' '],
 	  [' ', turn_chars[1], ' ', ' ', ' ', turn_chars[1], ' ', turn_chars[1]],
 	];
+
+	// test move history: shows branching double jump choice
+	// (2,0) -> (3,1)
+	// (7,1) -> (5,3)
+	// (3,1) -> (4,0)
+	// (5,3) -> (4,4)
+	// (4,0) -> (5,1)
+	// (6,4) -> (5,3)
+	// (5,1) -> (6,2)
+	// (5,3) -> (4,2)
+	// (6,2) -> (7,3)
+	// (1,1) -> (0,2)
+	// (7,3) -> (6,4)
+	// (7,5) -> (5,3)
+	// (0,2) -> (2,4)
+	// (1,5) -> (3,3)
+	// (3,3) -> (5,1)
+	// (5,3) -> (4,2)
+	// (5,1) -> (6,2)
+	// (4,4) -> (3,3)
+	// (6,2) -> (7,3)
+	// (4,2) -> (3,1)
 
 	this.turn = 0;
 
@@ -82,8 +107,32 @@ Match.prototype.init = function()
 												   this.game.turn_values[this.turn]);
 };
 
+Match.prototype.is_over = function()
+{
+	var p1count = 0, p2count = 0;
+
+	for (key in this.piece_tile_assocs)
+	{
+		if (this.piece_tile_assocs.hasOwnProperty(key))
+		{
+			if (this.piece_tile_assocs[key].piece.value == this.game.turn_values[0])
+				p1count++;
+			else if (this.piece_tile_assocs[key].piece.value == this.game.turn_values[1])
+				p2count++;
+		}
+	}
+
+	console.log("p1: " + p1count.toString());
+	console.log("p2: " + p2count.toString());
+
+	return p1count == 0 || p2count == 0;
+};
+
 Match.prototype.get_notification = function(pos)
 {
+	if (this.game_over)
+		return;
+
 	if (this.state == 0)
 	{
 		this.pos0 = pos;
@@ -100,7 +149,7 @@ Match.prototype.get_notification = function(pos)
 			this.possible_moves = this.game.possible_moves(this.board, this.piece_tile_assocs,
 														   this.game.turn_values[this.turn]);
 			
-			console.log("found piece");
+			// console.log("found piece");
 			return;
 		}
 
@@ -127,7 +176,7 @@ Match.prototype.get_notification = function(pos)
 										 this.piece_tile_assocs, 
 										 this.game.turn_values[this.turn]);
 
-			console.log(m);
+			// console.log(m);
 
 			if (m == "jump")
 			{
@@ -135,6 +184,12 @@ Match.prototype.get_notification = function(pos)
 				if (pjumps.length == 0)
 				{
 					console.log("switched turn");
+					
+					this.game_over = this.is_over();
+
+					if (this.game_over)
+						this.winner = this.game.turn_values[this.turn];
+
 					// switch the turn
 					this.turn = (this.turn == 1) ? 0 : 1;
 				}
@@ -145,11 +200,23 @@ Match.prototype.get_notification = function(pos)
 
 					for (i = 0; i < pjumps.length; i++)
 					{
-						if (pjumps[i].src != this.pos1)
+						if (pjumps[i].src.r != this.pos1.r && 
+							pjumps[i].src.c != this.pos1.c)
+						{
+							console.log("removing...");
+							console.log(pjumps[i].src);
+							console.log(this.pos1);
 							filtered.remove(filtered[i]);
+						}
 					}
 
 					this.possible_moves = filtered;
+
+					if (this.possible_moves.length == 0)
+					{
+						console.log("turn switched after jump");
+						this.turn = (this.turn == 1) ? 0 : 1; 
+					}
 				}
 			}
 			else if (m == "move")

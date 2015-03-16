@@ -7,9 +7,7 @@ window.onload = function()
 	
 	var match = new Match("127.0.0.1", "127.0.0.1");
 
-	var view = new CheckersView(match, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, canvas);
+	var view = new CheckersView(match, 0, 60, CANVAS_WIDTH, CANVAS_HEIGHT, canvas);
 
-	setInterval( function() {
-		view.draw();
-	});
+	view.draw();
 };

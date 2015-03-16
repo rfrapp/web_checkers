@@ -31,10 +31,10 @@ Board.prototype.make_move = function(assocs, r0, c0, r1, c1)
 		type = "move";
 
 	// king a piece
-	if (assocs[rcstr(r1, c1)].piece.value == "B" && 
-		assocs[rcstr(r1, c1)].tile.row == this.rows ||
-		assocs[rcstr(r1, c1)].piece.value == "R" && 
-		assocs[rcstr(r1, c1)].tile.row == 0)
+	if ((assocs[rcstr(r1, c1)].piece.value == "B" && 
+			assocs[rcstr(r1, c1)].tile.row == this.rows - 1) ||
+		(assocs[rcstr(r1, c1)].piece.value == "R" && 
+				assocs[rcstr(r1, c1)].tile.row == 0))
 	{
 		assocs[rcstr(r1, c1)].piece.king();
 	}
