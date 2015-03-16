@@ -17,11 +17,12 @@ CheckersGame.prototype.other_turn_char = function(turn_char)
 
 // 
 // Check for Jump logic
-CheckersGame.prototype.is_jump = function(board, assocs, r0, c0, r1, c1, turn)
+CheckersGame.prototype.is_jump = function(board, r0, c0, r1, c1, turn)
 {
     var tile0 = board.arr[r0][c0];
     var tile1 = board.arr[r1][c1];
     var is_jump = false; 
+    var assocs = board.piece_tile_assocs;
     var a = assocs[r0.toString() + "," + c0.toString()];
     var a1 = assocs[r1.toString() + "," + c1.toString()];
 
@@ -64,11 +65,12 @@ CheckersGame.prototype.is_jump = function(board, assocs, r0, c0, r1, c1, turn)
     return is_jump; 
 };
 
-CheckersGame.prototype.is_move = function(board, assocs, r0, c0, r1, c1, turn)
+CheckersGame.prototype.is_move = function(board, r0, c0, r1, c1, turn)
 {
     var tile0 = board.arr[r0][c0];
     var tile1 = board.arr[r1][c1];
     var is_move = false;
+    var assocs = board.piece_tile_assocs;
     var a = assocs[rcstr(r0, c0)];
     var a1 = assocs[rcstr(r1, c1)];
 
@@ -103,9 +105,10 @@ CheckersGame.prototype.is_move = function(board, assocs, r0, c0, r1, c1, turn)
 //     delete assocs[rcstr(r, c)];
 // };
 
-CheckersGame.prototype.possible_jumps = function(board, assocs, turn)
+CheckersGame.prototype.possible_jumps = function(board, turn)
 {
     var possible_moves = [];
+    var assocs = board.piece_tile_assocs;
 
     for (key in assocs)
     {
@@ -118,20 +121,20 @@ CheckersGame.prototype.possible_jumps = function(board, assocs, turn)
             var c0 = t.col - 2;
             var c1 = t.col + 2;
 
-            if (this.is_valid_move(board, assocs, t.row, t.col, r, c0, turn))
+            if (this.is_valid_move(board, t.row, t.col, r, c0, turn))
                 possible_moves.push({ src: {r: t.row, c: t.col}, dst: {r: r, c: c0}});
 
-            if (this.is_valid_move(board, assocs, t.row, t.col, r, c1, turn))
+            if (this.is_valid_move(board, t.row, t.col, r, c1, turn))
                 possible_moves.push({ src: {r: t.row, c: t.col}, dst: {r: r, c: c1}});
 
             if (assocs[key].piece.is_king)
             {
                 r = t.row - rdiff;
 
-                if (this.is_valid_move(board, assocs, t.row, t.col, r, c0, turn))
+                if (this.is_valid_move(board, t.row, t.col, r, c0, turn))
                     possible_moves.push({ src: {r: t.row, c: t.col}, dst: {r: r, c: c0}});
 
-                if (this.is_valid_move(board, assocs, t.row, t.col, r, c1, turn))
+                if (this.is_valid_move(board, t.row, t.col, r, c1, turn))
                     possible_moves.push({ src: {r: t.row, c: t.col}, dst: {r: r, c: c1}});                
             }
         }
@@ -140,9 +143,10 @@ CheckersGame.prototype.possible_jumps = function(board, assocs, turn)
     return possible_moves;
 };
 
-CheckersGame.prototype.possible_forward_moves = function(board, assocs, turn)
+CheckersGame.prototype.possible_forward_moves = function(board, turn)
 {
     var possible_moves = [];
+    var assocs = board.piece_tile_assocs;
 
     // Get moves that are not jumps
     for (key in assocs)
@@ -156,20 +160,20 @@ CheckersGame.prototype.possible_forward_moves = function(board, assocs, turn)
             var c0 = t.col - 1;
             var c1 = t.col + 1;
 
-            if (this.is_valid_move(board, assocs, t.row, t.col, r, c0, turn))
+            if (this.is_valid_move(board, t.row, t.col, r, c0, turn))
                 possible_moves.push({ src: {r: t.row, c: t.col}, dst: {r: r, c: c0}});
 
-            if (this.is_valid_move(board, assocs, t.row, t.col, r, c1, turn))
+            if (this.is_valid_move(board, t.row, t.col, r, c1, turn))
                 possible_moves.push({ src: {r: t.row, c: t.col}, dst: {r: r, c: c1}});
 
             if (assocs[key].piece.is_king)
             {
                 r = t.row - rdiff;
 
-                if (this.is_valid_move(board, assocs, t.row, t.col, r, c0, turn))
+                if (this.is_valid_move(board, t.row, t.col, r, c0, turn))
                     possible_moves.push({ src: {r: t.row, c: t.col}, dst: {r: r, c: c0}});
 
-                if (this.is_valid_move(board, assocs, t.row, t.col, r, c1, turn))
+                if (this.is_valid_move(board, t.row, t.col, r, c1, turn))
                     possible_moves.push({ src: {r: t.row, c: t.col}, dst: {r: r, c: c1}});                
             }
         }
@@ -178,22 +182,24 @@ CheckersGame.prototype.possible_forward_moves = function(board, assocs, turn)
     return possible_moves;
 };
 
-CheckersGame.prototype.possible_moves = function(board, assocs, turn)
+CheckersGame.prototype.possible_moves = function(board, turn)
 {
     var possible_moves = new Array();
 
-    possible_moves = possible_moves.concat(this.possible_jumps(board, assocs, turn));
+    possible_moves = possible_moves.concat(this.possible_jumps(board, turn));
     
     if (possible_moves.length == 0)
-        possible_moves = possible_moves.concat(this.possible_forward_moves(board, assocs, turn));
+        possible_moves = possible_moves.concat(this.possible_forward_moves(board, turn));
 
     return possible_moves;
 };
 
-CheckersGame.prototype.is_valid_move = function(board, assocs, r0, c0, r1, c1, turn)
+CheckersGame.prototype.is_valid_move = function(board, r0, c0, r1, c1, turn)
 {
     // console.log("r0: " + r0.toString() + " c0: " + c0.toString());
     // console.log("r1: " + r1.toString() + " c1: " + c1.toString());
+
+    var assocs = board.piece_tile_assocs;
 
     // check if input is correct
     if (r0 < 0 || r0 >= board.rows)      return false;
@@ -204,15 +210,13 @@ CheckersGame.prototype.is_valid_move = function(board, assocs, r0, c0, r1, c1, t
 
     // copy board and associtions so the
     // match state is not changed here
-    var new_board  = (owl.deepCopy(board));
-    var new_assocs = (owl.deepCopy(assocs));
     var tile0_pass = false;
     var tile1_pass = false;
 
     tile0_pass     = assocs[rcstr(r0, c0)].piece.value == turn;
 
-    var is_move    = this.is_move(board, assocs, r0, c0, r1, c1, turn);
-    var is_jump    = this.is_jump(board, assocs, r0, c0, r1, c1, turn);
+    var is_move    = this.is_move(board, r0, c0, r1, c1, turn);
+    var is_jump    = this.is_jump(board, r0, c0, r1, c1, turn);
     
     tile1_pass     = is_move || is_jump;
 

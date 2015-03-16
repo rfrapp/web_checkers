@@ -4,9 +4,7 @@ var Match = function(player1_ip, player2_ip)
 	this.game  = new CheckersGame();
 	this.board = new Board(BOARD_ROWS, BOARD_COLS, 
 	                       this.game.turn_values, null);
-	this.board.init();
-	this.piece_tile_assocs = {};
-
+	
 	this.game_over = false;
 	this.winner = 0;
 
@@ -14,6 +12,8 @@ var Match = function(player1_ip, player2_ip)
 
 	this.move_history = [];
 	this.possible_moves = [];
+
+	this.pieces = [];
 
 	this.simple_init_state = [
 	  [turn_chars[0], ' ', turn_chars[0], ' ', turn_chars[0], ' ', turn_chars[0], ' '],
@@ -72,6 +72,7 @@ var Match = function(player1_ip, player2_ip)
 	this.pos0 = null;
 	this.pos1 = null;
 
+	this.board.init();
 	this.init();
 };
 
@@ -98,26 +99,27 @@ Match.prototype.init = function()
 			{
 				var p = new CheckersPiece(this.simple_init_state[i][j]);
 				var t = this.board.arr[i][j];
-				this.piece_tile_assocs[i.toString() + "," + j.toString()] = new PieceTileAssociation(p, t);
+				this.pieces.push(p);
+				this.board.add_piece(p, i, j);
+				// this.piece_tile_assocs[i.toString() + "," + j.toString()] = new PieceTileAssociation(p, t);
 			}
 		}
 	}
 
-	this.possible_moves = this.game.possible_moves(this.board, this.piece_tile_assocs,
-												   this.game.turn_values[this.turn]);
+	this.possible_moves = this.game.possible_moves(this.board, this.game.turn_values[this.turn]);
 };
 
 Match.prototype.is_over = function()
 {
 	var p1count = 0, p2count = 0;
 
-	for (key in this.piece_tile_assocs)
+	for (key in this.board.piece_tile_assocs)
 	{
-		if (this.piece_tile_assocs.hasOwnProperty(key))
+		if (this.board.piece_tile_assocs.hasOwnProperty(key))
 		{
-			if (this.piece_tile_assocs[key].piece.value == this.game.turn_values[0])
+			if (this.board.piece_tile_assocs[key].piece.value == this.game.turn_values[0])
 				p1count++;
-			else if (this.piece_tile_assocs[key].piece.value == this.game.turn_values[1])
+			else if (this.board.piece_tile_assocs[key].piece.value == this.game.turn_values[1])
 				p2count++;
 		}
 	}
@@ -137,17 +139,16 @@ Match.prototype.get_notification = function(pos)
 	{
 		this.pos0 = pos;
 		this.state = 1;
-		this.possible_moves = this.game.possible_moves(this.board, this.piece_tile_assocs,
-													   this.game.turn_values[this.turn]);
+		this.possible_moves = this.game.possible_moves(this.board, this.game.turn_values[this.turn]);
+		return;
 	}
 	else if (this.state == 1)
 	{
-		if (this.piece_tile_assocs[rcstr(pos.r, pos.c)] !== undefined)
+		if (this.board.piece_tile_assocs[rcstr(pos.r, pos.c)] !== undefined)
 		{
 			this.pos0 = pos;
 			this.state = 1;
-			this.possible_moves = this.game.possible_moves(this.board, this.piece_tile_assocs,
-														   this.game.turn_values[this.turn]);
+			this.possible_moves = this.game.possible_moves(this.board, this.game.turn_values[this.turn]);
 			
 			// console.log("found piece");
 			return;
@@ -158,23 +159,20 @@ Match.prototype.get_notification = function(pos)
 		// console.log("(" + this.pos0.r + ", " + this.pos0.c + ")" + " " +
 		// 			"(" + this.pos1.r + ", " + this.pos1.c + ")")
 
-		var move = this.game.is_valid_move(this.board, this.piece_tile_assocs, this.pos0.r, this.pos0.c, this.pos1.r, this.pos1.c, 
-				   					  	   this.game.turn_values[this.turn], true);
+		var move = this.game.is_valid_move(this.board, this.pos0.r, this.pos0.c, this.pos1.r, this.pos1.c, 
+				   					  	   this.game.turn_values[this.turn]);
 		
 		// if requested move is valid
 		if (move)
 		{
 			// tell board to make the move
-			var m = this.board.make_move(this.piece_tile_assocs, this.pos0.r, this.pos0.c,
-								 		 this.pos1.r, this.pos1.c);
+			var m = this.board.make_move(this.pos0.r, this.pos0.c, this.pos1.r, this.pos1.c);
 
 			// record move sequence 
 			this.move_history.push({ src: { r: this.pos0.r, c: this.pos0.c }, 
 									 dst: { r: this.pos1.r, c: this.pos1.c } });
 		
-			var pjumps = this.game.possible_jumps(this.board, 
-										 this.piece_tile_assocs, 
-										 this.game.turn_values[this.turn]);
+			var pjumps = this.game.possible_jumps(this.board, this.game.turn_values[this.turn]);
 
 			// console.log(m);
 

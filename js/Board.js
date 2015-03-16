@@ -9,38 +9,44 @@ var Board = function(rows, cols, turn_chars)
   this.arr = [];
   this.turn_index = 0;
   this.turn_chars = turn_chars;
+  this.piece_tile_assocs = {};
 };
 
-Board.prototype.make_move = function(assocs, r0, c0, r1, c1)
+Board.prototype.make_move = function(r0, c0, r1, c1)
 {
 	var type = "";
-	var a0 = assocs[rcstr(r0, c0)];
+	var a0 = this.piece_tile_assocs[rcstr(r0, c0)];
     a0.tile = this.arr[r1][c1];
 
-    delete assocs[rcstr(r0, c0)];
-    assocs[rcstr(r1, c1)] = a0;
+    delete this.piece_tile_assocs[rcstr(r0, c0)];
+    this.piece_tile_assocs[rcstr(r1, c1)] = a0;
 
     // move was a jump
     if (Math.abs(r1 - r0) == 2 && Math.abs(c1 - c0) == 2)
     {
     	var mr = (r1 + r0) / 2, mc = (c1 + c0) / 2;
-    	delete assocs[rcstr(mr, mc)];
+    	delete this.piece_tile_assocs[rcstr(mr, mc)];
     	type = "jump";
     }
 	else    
 		type = "move";
 
 	// king a piece
-	if ((assocs[rcstr(r1, c1)].piece.value == "B" && 
-			assocs[rcstr(r1, c1)].tile.row == this.rows - 1) ||
-		(assocs[rcstr(r1, c1)].piece.value == "R" && 
-				assocs[rcstr(r1, c1)].tile.row == 0))
+	if ((this.piece_tile_assocs[rcstr(r1, c1)].piece.value == "B" && 
+			this.piece_tile_assocs[rcstr(r1, c1)].tile.row == this.rows - 1) ||
+		(this.piece_tile_assocs[rcstr(r1, c1)].piece.value == "R" && 
+				this.piece_tile_assocs[rcstr(r1, c1)].tile.row == 0))
 	{
-		assocs[rcstr(r1, c1)].piece.king();
+		this.piece_tile_assocs[rcstr(r1, c1)].piece.king();
 	}
 
 	return type;
 };
+
+Board.prototype.add_piece = function(piece, i, j)
+{
+	this.piece_tile_assocs[rcstr(i, j)] = { piece: piece, tile: this.arr[i][j] };
+}
 
 Board.prototype.init = function()
 {

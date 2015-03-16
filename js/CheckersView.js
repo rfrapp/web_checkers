@@ -75,7 +75,7 @@ CheckersView.prototype.handle_input = function(event)
 	var rects = this.tile_rects;
 	var i = 0, j = 0;
 
-	var assocs = this.parent.piece_tile_assocs;
+	var assocs = this.parent.board.piece_tile_assocs;
 
 	for (i = 0; i < board.rows; i++)
 	{
@@ -184,7 +184,7 @@ CheckersView.prototype.draw = function()
 		color_counter++;
 	}
 
-	var assocs = this.parent.piece_tile_assocs;
+	var assocs = this.parent.board.piece_tile_assocs;
 	var possible = null;
 
 	if (this.selected_piece_r != -1 && this.selected_piece_c != -1)
