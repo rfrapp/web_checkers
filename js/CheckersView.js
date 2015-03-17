@@ -29,16 +29,21 @@ CheckersView.prototype.update_move_history = function()
 {
 	var moves = this.parent.move_history;
 	var move_display = document.getElementById("move_history");
-	var i = 0;
 	var html = "";
 
-	for (i = 0; i < moves.length; i++)
+	for (var i = 0; i < moves.length; i++)
 	{
-		var j = 0;
 		html += "<li>"
-		html += "(" + rcstr(moves[i].src.r, moves[i].src.c) + ")";
-		html += " -> "
-		html += "(" + rcstr(moves[i].dst.r, moves[i].dst.c) + ")";
+		for (var j = 0; j < moves[i].length; j++)
+		{
+			html += "(" + rcstr(moves[i][j].src.r, moves[i][j].src.c) + ")";
+			html += " -> "
+			html += "(" + rcstr(moves[i][j].dst.r, moves[i][j].dst.c) + ")";
+
+			if (j != moves[i].length - 1)
+				html += ", "
+		}
+
 		html += "</li>"
 	}
 

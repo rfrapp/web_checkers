@@ -158,7 +158,10 @@ Match.prototype.is_over = function()
 // this.move_sequence into this.move_history 
 Match.prototype.switch_turn = function()
 {
-
+	this.turn = (this.turn == 0) ? 1 : 0;
+	this.move_history.push(this.move_sequence);
+	this.move_sequence = [];
+	console.log(this.move_history);
 }
 
 // A function that's called by the CheckersView
@@ -208,9 +211,11 @@ Match.prototype.get_notification = function(pos)
 			// Tell board to make the move
 			var m = this.board.make_move(this.pos0.r, this.pos0.c, this.pos1.r, this.pos1.c);
 
-			// Record move sequence 
-			this.move_history.push({ src: { r: this.pos0.r, c: this.pos0.c }, 
-									 dst: { r: this.pos1.r, c: this.pos1.c } });
+			// Record move in the running sequence for this turn
+			this.move_sequence.push({ src: { r: this.pos0.r, c: this.pos0.c }, 
+			  						  dst: { r: this.pos1.r, c: this.pos1.c } });
+			// this.move_history.push({ src: { r: this.pos0.r, c: this.pos0.c }, 
+			// 						 dst: { r: this.pos1.r, c: this.pos1.c } });
 
 			// If the move was a jump (which was determined
 			// in Board.make_move)
@@ -236,7 +241,7 @@ Match.prototype.get_notification = function(pos)
 						this.winner = this.game.turn_values[this.turn];
 
 					// Switch the turn
-					this.turn = (this.turn == 1) ? 0 : 1;
+					this.switch_turn();
 				}
 
 				// There are jumps that can be made
@@ -267,7 +272,8 @@ Match.prototype.get_notification = function(pos)
 					// which was just moved, then switch the turn
 					if (this.possible_moves.length == 0)
 					{
-						this.turn = (this.turn == 1) ? 0 : 1; 
+						// this.turn = (this.turn == 1) ? 0 : 1; 
+						this.switch_turn();
 					}
 				}
 			}
@@ -277,7 +283,8 @@ Match.prototype.get_notification = function(pos)
 			else if (m == "move")
 			{
 				// switch the turn
-				this.turn = (this.turn == 1) ? 0 : 1;
+				// this.turn = (this.turn == 1) ? 0 : 1;
+				this.switch_turn();
 			}
 		}
 
