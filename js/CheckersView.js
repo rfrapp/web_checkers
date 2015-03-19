@@ -1,19 +1,45 @@
 
 var CheckersView = function(parent, x, y, w, h, canvas_element)
 {
+	// Stores a reference to a Match object
 	this.parent = parent;
+
+	// The bounding rectangle for the view
 	this.rect = new Rect(x, y, w, h);
+
+	// The DOM element for te canvas
 	this.canvas_element = canvas_element;
+
+	// The canvas' context (i.e. the thing that draws stuff)
 	this.context = canvas_element.getContext("2d");
+
+	// Characters that represent a turn
 	this.turn_chars = parent.game.turn_values;
+
+	// Colors for each turn (element 0 applies to turn_chars[0] etc)
 	this.turn_colors = ["black", "#B8022C"];
+
+	// Stores the rectangles for the tiles
+	// 2D-Array
 	this.tile_rects = [];
+
+	// Initialize an image element for the 
+	// "Kinged" image
 	this.king_image = new Image();
 	this.king_image.src = "images/crown-small.png";
+
 	this.king_img_loaded = false;
+
+	// Row and column for a piece that the user
+	// selects
 	this.selected_piece_r = -1;
 	this.selected_piece_c = -1;
+
+	// The color to highlight tiles for possible 
+	// moves (when match state = 1)
 	this.selected_tile_color = "#76A2F5";
+
+	// A container for possible moves
 	this.possible_moves = null;
 
 	this.init();
@@ -25,6 +51,8 @@ CheckersView.prototype.wire_events = function()
 	this.canvas_element.addEventListener('click', this.handle_input.bind(this));
 }
 
+// Update the display of move history with the 
+// match's new history 
 CheckersView.prototype.update_move_history = function()
 {
 	var moves = this.parent.move_history;
@@ -50,6 +78,7 @@ CheckersView.prototype.update_move_history = function()
 	move_display.innerHTML = html;
 }
 
+// Create tile rectangles 
 CheckersView.prototype.init = function()
 {
 	var board = this.parent.board;
@@ -72,6 +101,7 @@ CheckersView.prototype.init = function()
 	}
 }
 
+// Check for user click input 
 CheckersView.prototype.handle_input = function(event)
 {
 	var r = -1, c = -1;
@@ -86,66 +116,50 @@ CheckersView.prototype.handle_input = function(event)
 	{
 	    for (j = 0; j < board.cols; j++)
 	    {
-	    	// if (this.parent.state == 0)
-	    	// {
-	    		var a = assocs[i.toString() + "," + j.toString()];
+    		var a = assocs[rcstr(i, j)];
 
-	    		// if (!a) continue;
+    		// space selected, clear selection
+    		if (rects[i][j].collide_point(mouse_pos.x, mouse_pos.y)
+    			&& !a)
+    		{
+    		    r = i;
+    		    c = j;
+    		    this.selected_piece_r = -1;
+    		    this.selected_piece_c = -1;
+    		    break;
+    		}
 
-	    		// space selected, clear selection
-	    		if (rects[i][j].collide_point(mouse_pos.x, mouse_pos.y)
-	    			&& !a)
-	    		{
-	    		    r = i;
-	    		    c = j;
-	    		    this.selected_piece_r = -1;
-	    		    this.selected_piece_c = -1;
-	    		    break;
-	    		}
+    		// if the clicked tile has a piece
+    		// and the piece is the same as the turn
+	        if (rects[i][j].collide_point(mouse_pos.x, mouse_pos.y) &&
+	        	a.piece.value == this.parent.game.turn_values[this.parent.turn])
+	        {
+	            r = i;
+	            c = j;
 
-	    		// if the clicked tile has a piece
-	    		// and the piece is the same as the turn
-		        if (rects[i][j].collide_point(mouse_pos.x, mouse_pos.y) &&
-		        	a.piece.value == this.parent.game.turn_values[this.parent.turn])
-		        {
-		            r = i;
-		            c = j;
-
-		            this.selected_piece_r = i;
-		            this.selected_piece_c = j;
-		            break;
-		        }
-		    // }
-		    // else
-		    // {
-		    // 	if (rects[i][j].collide_point(mouse_pos.x, mouse_pos.y))
-		    // 	{
-		    // 	    r = i;
-		    // 	    c = j;
-		    // 	    this.selected_piece_r = -1;
-		    // 	    this.selected_piece_c = -1;
-		    // 	    break;
-		    // 	}
-		    // }
+	            this.selected_piece_r = i;
+	            this.selected_piece_c = j;
+	            break;
+	        }
 	    }
 	}
 
+	// The user clicked on a valid tile 
 	if (r != -1 && c != -1)
 	{
-		// console.log("here");
-
+		// Tell the match about the move
 		this.parent.get_notification({r: r, c: c});
 
 		if (this.parent.is_possible_src(r, c) && this.parent.state == 1)
 		{
 			this.possible_moves = this.parent.possible_moves;
-			// console.log(this.possible_moves);
 		}
 		else if (this.parent.state == 0)
 		{
 			this.possible_moves = [];
 		}
 
+		// Re-draw the match history 
 		this.update_move_history();
 		this.draw();
 	}
@@ -195,8 +209,6 @@ CheckersView.prototype.draw = function()
 	if (this.selected_piece_r != -1 && this.selected_piece_c != -1)
 	{
 		possible = this.possible_moves;
-		// console.log("possible:");
-		// console.log(possible);
 
 		if (possible)
 		{

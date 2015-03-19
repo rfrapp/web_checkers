@@ -91,20 +91,6 @@ CheckersGame.prototype.is_move = function(board, r0, c0, r1, c1, turn)
     return is_move; 
 };
 
-// CheckersGame.prototype.move_piece = function(board, assocs, r0, c0, r1, c1)
-// {
-//     var a0 = assocs[rcstr(r0, c0)];
-//     a0.tile = board.arr[r1][c1];
-
-//     delete assocs[rcstr(r0, c0)];
-//     assocs[rcstr(r1, c1)] = a0;
-// };
-
-// CheckersGame.prototype.remove_piece = function(board, assocs, r, c)
-// {
-//     delete assocs[rcstr(r, c)];
-// };
-
 CheckersGame.prototype.possible_jumps = function(board, turn)
 {
     var possible_moves = [];
@@ -196,9 +182,6 @@ CheckersGame.prototype.possible_moves = function(board, turn)
 
 CheckersGame.prototype.is_valid_move = function(board, r0, c0, r1, c1, turn)
 {
-    // console.log("r0: " + r0.toString() + " c0: " + c0.toString());
-    // console.log("r1: " + r1.toString() + " c1: " + c1.toString());
-
     var assocs = board.piece_tile_assocs;
 
     // check if input is correct

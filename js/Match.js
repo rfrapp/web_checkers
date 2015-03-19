@@ -63,6 +63,23 @@ var Match = function(player1_ip, player2_ip)
 	  [' ', ' ', ' ', ' ', turn_chars[1], ' ', turn_chars[1], ' '],
 	];
 
+	// Test state for showing that when no one has a move,
+	// the winner goes to the other end
+	// this.simple_init_state = [
+	//   [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+
+	//   [turn_chars[0], ' ', turn_chars[0], ' ', turn_chars[0], ' ', turn_chars[0], ' '],
+	//   [' ', turn_chars[0], ' ', turn_chars[0], ' ', turn_chars[0], ' ', turn_chars[0]],
+	//   [turn_chars[0], ' ', turn_chars[0], ' ', turn_chars[0], ' ', turn_chars[0], ' '],
+
+	//   [' ', turn_chars[1], ' ', turn_chars[1], ' ', turn_chars[1], ' ', turn_chars[1]],
+	//   [turn_chars[1], ' ', turn_chars[1], ' ', turn_chars[1], ' ', turn_chars[1], ' '],
+	//   [' ', turn_chars[1], ' ', turn_chars[1], ' ', turn_chars[1], ' ', turn_chars[1]],
+
+	//   [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
+	// ];
+
+
 	this.turn = 0;
 
 	// The state of the game
@@ -128,6 +145,12 @@ Match.prototype.init = function()
 
 	// Get the possible moves for the current turn
 	this.possible_moves = this.game.possible_moves(this.board, this.game.turn_values[this.turn]);
+
+	if (this.possible_moves.length == 0)
+	{
+		this.game_over = true;
+		this.winner = (this.turn == 0) ? this.game.turn_values[1] : this.game.turn_values[0];
+	}
 };
 
 // Checks if the game is over. 
@@ -161,7 +184,7 @@ Match.prototype.switch_turn = function()
 	this.turn = (this.turn == 0) ? 1 : 0;
 	this.move_history.push(this.move_sequence);
 	this.move_sequence = [];
-	console.log(this.move_history);
+	// console.log(this.move_history);
 }
 
 // A function that's called by the CheckersView
@@ -258,9 +281,9 @@ Match.prototype.get_notification = function(pos)
 						if (pjumps[i].src.r != this.pos1.r && 
 							pjumps[i].src.c != this.pos1.c)
 						{
-							console.log("removing...");
-							console.log(pjumps[i].src);
-							console.log(this.pos1);
+							//console.log("removing...");
+							//console.log(pjumps[i].src);
+							//console.log(this.pos1);
 							filtered.remove(filtered[i]);
 						}
 					}
@@ -291,5 +314,11 @@ Match.prototype.get_notification = function(pos)
 		// Switch the state to 0. User can now
 		// select a piece
 		this.state = 0;
+	}
+
+	if (this.possible_moves.length == 0)
+	{
+		this.game_over = true;
+		this.winner = (this.turn == 0) ? 1 : 0;
 	}
 }
